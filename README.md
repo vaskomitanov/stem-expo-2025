@@ -10,5 +10,5 @@ this project will be a game of simon says
 # Running the game
 ```sh
 . setup_env.sh
-python3 game.py
+python game.py
 ```

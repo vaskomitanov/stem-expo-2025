@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TAPPAS CORE Definitions
-CORE_VENV_NAME="venv_hailo_rpi5_examples"
+CORE_VENV_NAME="venv_stem_expo_2025"
 CORE_REQUIRED_VERSION=("3.30.0" "3.31.0")
 
 # TAPPAS Definitions

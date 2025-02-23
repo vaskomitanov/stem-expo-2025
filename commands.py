@@ -1,7 +1,7 @@
 import pose
 
 simon_says = [
-    { "cmd": "hands on head", "check": lambda pose: True },
+    { "cmd": "hands on head", "check": lambda p: pose.hands_on_head(p) },
     { "cmd": "touch your nose", "check": lambda pose: True },
     { "cmd": "left leg up", "check": lambda pose: True },
     { "cmd": "right leg up", "check": lambda pose: True },

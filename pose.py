@@ -1,3 +1,5 @@
+import math
+
 class Pose:
     def __init__(self, raw_data):
         self.nose = raw_data[0]
@@ -24,8 +26,11 @@ def left_hand_raised(pose):
 def right_hand_raised(pose):
     return pose.right_wrist.y() < pose.right_shoulder.y()
 
-def hands_on_head(pose):
-    return pose.right_wrist.y() < pose.right_shoulder.y() and pose.left_wrist.y() < pose.left_shoulder.y()
+def distance(point_a, point_b):
+    return math.sqrt((point_a.x() - point_b.x()) ** 2 + (point_a.y() - point_b.y()) ** 2)
 
-def touch_your_nose(pose):
-    return pose.
+def are_close(point_a, point_b):
+    return int(distance(point_a, point_b) * 1000) < 100
+
+def hands_on_head(pose):
+    return are_close(pose.left_wrist, pose.left_ear) and are_close(pose.right_wrist, pose.right_ear)

@@ -43,11 +43,6 @@ fi
 echo "Installing required Python dependencies..."
 pip install -r requirements.txt
 
-# Install test requirements if needed
-if [[ "$INSTALL_TEST_REQUIREMENTS" == true ]]; then
-    echo "Installing test requirements..."
-    pip install -r tests/test_resources/requirements.txt
-fi
 
 # Download resources needed for the pipelines
 echo "Downloading resources needed for the pipelines..."

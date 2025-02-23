@@ -28,7 +28,7 @@ from hailo_apps_infra.hailo_rpi_common import (
 )
 from hailo_apps_infra.pose_estimation_pipeline import GStreamerPoseEstimationApp
 from commands import simon_says
-from pose import Pose, left_hand_raised, right_hand_raised
+from pose import Pose, left_hand_raised, right_hand_raised, hands_on_head
 
 _FILE = Path(__file__)
 _DIR = _FILE.parent
@@ -86,10 +86,7 @@ def say_text(voice, players_out_text, last_command_idx, did_simon_say):
         os.remove(output_file)
 
     item = simon_says[last_command_idx]
-    if did_simon_say:
-        text = "Simon says: {}".format(item["cmd"])
-    else:
-        text = item["cmd"]
+    text = ("Simon says, {}" if did_simon_say else "Hmm...{}").format(item["cmd"])
 
     if players_out_text:
         text = players_out_text + ". " + text
@@ -115,6 +112,18 @@ def app_callback(pad, info, user_data):
     roi = hailo.get_roi_from_buffer(buffer)
     detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
 
+    
+    # for detection in detections:
+    #     label = detection.get_label()
+    #     bbox = detection.get_bbox()
+    #     confidence = detection.get_confidence()
+    #     if label == "person":
+    #         landmarks = detection.get_objects_typed(hailo.HAILO_LANDMARKS)
+    #         if len(landmarks) > 0:
+    #             points = landmarks[0].get_points()
+    #             if len(points) == 17:
+    #                 print(hands_on_head(Pose(points)))
+
     if user_data.frame_count % 200 == 0:
         if user_data.say_process is not None:
             # previous process didn't finish, wait for it first
@@ -138,7 +147,8 @@ def app_callback(pad, info, user_data):
                     points = landmarks[0].get_points()
                     if len(points) == 17:
                         if user_data.last_command_idx is not None and user_data.did_simon_say is True:
-                            if simon_says[user_data.last_command_idx]["check"](Pose(points)) is False:
+                            pose = Pose(points)
+                            if simon_says[user_data.last_command_idx]["check"](pose) is False:
                                 players_out.append(str(player_num))
 
 
