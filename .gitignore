@@ -1,0 +1,13 @@
+bin
+include
+lib
+lib64
+resources
+share
+tests
+doc
+community_projects
+venv_hailo_rpi5_examples
+en_US-ryan-medium.onnx
+en_US-ryan-medium.onnx.json
+__pycache__
