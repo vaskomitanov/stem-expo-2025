@@ -76,16 +76,16 @@ class user_app_callback_class(app_callback_class):
             model, config = find_voice(model, data_dir)
 
         self.voice = PiperVoice.load(model, config_path=config, use_cuda=False)
-        self.last_command_idx = None
+        self.last_simon_says_command_idx = None
         self.did_simon_say = False
         self.say_process = None
 
 
-def say_text(voice, players_out_text, last_command_idx, did_simon_say):
+def say_text(voice, players_out_text, command_idx, did_simon_say):
     if os.path.exists(output_file):
         os.remove(output_file)
 
-    item = simon_says[last_command_idx]
+    item = simon_says[command_idx]
     text = ("Simon says, {}" if did_simon_say else "Hmm...{}").format(item["cmd"])
 
     if players_out_text:
@@ -122,9 +122,8 @@ def app_callback(pad, info, user_data):
                 if len(landmarks) > 0:
                     points = landmarks[0].get_points()
                     if len(points) == 17:
-                        if user_data.last_command_idx is not None and user_data.did_simon_say is True:
-                            pose = Pose(points)
-                            if simon_says[user_data.last_command_idx]["check"](pose) is False:
+                        if user_data.last_simon_says_command_idx is not None:
+                            if simon_says[user_data.last_simon_says_command_idx]["check"](Pose(points)) is False:
                                 players_out.append(str(player_num))
 
 
@@ -138,9 +137,10 @@ def app_callback(pad, info, user_data):
         command_idx = random.randint(0, len(simon_says) - 1)
         simon_say = (random.randint(1, 2) == 1) # 50% probability of "simon says"
         user_data.say_process = Process(target=say_text, args=(user_data.voice, players_out_text, command_idx, simon_say))
-        user_data.say_process.start()
-        user_data.last_command_idx = command_idx
+        if simon_say:
+            user_data.last_simon_says_command_idx = command_idx
         user_data.did_simon_say = simon_say
+        user_data.say_process.start()
 
     return Gst.PadProbeReturn.OK
 
