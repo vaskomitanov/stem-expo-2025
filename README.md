@@ -2,7 +2,7 @@
 
 This project is the game of simon says
 
-# Hardware prerequisites
+# Hardware Prerequisites
 
 - Raspberry Pi 5
 - Raspberry Pi Camera Module 3 - 12MP 120 Degree Wide Angle Lens
@@ -14,13 +14,14 @@ Touch
 - Raspberry Pi 27W USB-C Power Supply Black US
 - Bluetooth speaker Oontz Angle
 
-# Installing Python virtual environment
+# Installing Python Virtual Environment
 ```sh
 ./install.sh
 ```
 
-# Running the game
+# Running the Game
 ```sh
+cd stem-expo-2025
 . setup_env.sh
 python game.py
 ```

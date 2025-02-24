@@ -32,5 +32,26 @@ def distance(point_a, point_b):
 def are_close(point_a, point_b):
     return int(distance(point_a, point_b) * 1000) < 100
 
+def are_closeish(point_a, point_b):
+    return int(distance(point_a, point_b) * 1000) < 400
+
+def are_close_but_far(point_a, point_b):
+    return int(distance(point_a, point_b) * 1000) < 900
+
 def hands_on_head(pose):
     return are_close(pose.left_wrist, pose.left_ear) and are_close(pose.right_wrist, pose.right_ear)
+
+def touch_your_nose(pose):
+    return are_close_but_far(pose.left_wrist, pose.nose) or are_closeish(pose.right_wrist, pose.nose)
+
+def left_leg_up(pose):
+    return are_close_but_far(pose.left_ankle, pose.left_knee)
+
+def right_leg_up(pose):
+    return are_close_but_far(pose.right_ankle, pose.right_knee)
+
+def hands_on_hips(pose):
+    return are_close_but_far(pose.left_wrist, pose.left_hip) and are_close(pose.right_wrist, pose.right_hip)
+
+def squat_down(pose):
+    return pose.left_hip.y() > pose.left_knee.y() and pose.right_hip.y() > pose.right_knee.y()
