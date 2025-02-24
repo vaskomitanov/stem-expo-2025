@@ -103,26 +103,9 @@ def app_callback(pad, info, user_data):
     if buffer is None:
         return Gst.PadProbeReturn.OK
 
-    # Using the user_data to count the number of frames
     user_data.increment()
-
-    # Get the caps from the pad
-    format, width, height = get_caps_from_pad(pad)
-
     roi = hailo.get_roi_from_buffer(buffer)
     detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
-
-    
-    # for detection in detections:
-    #     label = detection.get_label()
-    #     bbox = detection.get_bbox()
-    #     confidence = detection.get_confidence()
-    #     if label == "person":
-    #         landmarks = detection.get_objects_typed(hailo.HAILO_LANDMARKS)
-    #         if len(landmarks) > 0:
-    #             points = landmarks[0].get_points()
-    #             if len(points) == 17:
-    #                 print(hands_on_head(Pose(points)))
 
     if user_data.frame_count % 200 == 0:
         if user_data.say_process is not None:
@@ -133,15 +116,8 @@ def app_callback(pad, info, user_data):
         players_out = []
         for detection in detections:
             label = detection.get_label()
-            bbox = detection.get_bbox()
-            confidence = detection.get_confidence()
             if label == "person":
                 player_num += 1
-                track_id = 0
-                track = detection.get_objects_typed(hailo.HAILO_UNIQUE_ID)
-                if len(track) == 1:
-                    track_id = track[0].get_id()
-
                 landmarks = detection.get_objects_typed(hailo.HAILO_LANDMARKS)
                 if len(landmarks) > 0:
                     points = landmarks[0].get_points()
