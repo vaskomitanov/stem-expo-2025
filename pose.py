@@ -48,10 +48,14 @@ def touch_your_nose(pose):
     return are_close_but_far(pose.left_wrist, pose.nose) or are_closeish(pose.right_wrist, pose.nose)
 
 def left_leg_up(pose):
-    return are_close_but_really_far(pose.left_ankle, pose.left_knee)
+    dx = pose.left_ankle.x() - pose.right_ankle.x()
+    dy = pose.left_ankle.y() - pose.right_ankle.y()
+    return dx/dy > 0.0
 
 def right_leg_up(pose):
-    return are_close_but_really_far(pose.right_ankle, pose.right_knee)
+    dx = pose.left_ankle.x() - pose.right_ankle.x()
+    dy = pose.left_ankle.y() - pose.right_ankle.y()
+    return dx/dy < 0.0
 
 def hands_on_hips(pose):
     return are_close_but_far(pose.left_wrist, pose.left_hip) and are_close(pose.right_wrist, pose.right_hip)

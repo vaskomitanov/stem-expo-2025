@@ -1,12 +1,9 @@
-import argparse
 import logging
 import sys
-import time
 import wave
 from pathlib import Path
 from typing import Any, Dict
 import subprocess
-import time
 import random
 import os
 from multiprocessing import Process
@@ -16,19 +13,15 @@ from piper.download import ensure_voice_exists, find_voice, get_voices
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib
-import numpy as np
-import cv2
+from gi.repository import Gst
 import hailo
 
 from hailo_apps_infra.hailo_rpi_common import (
-    get_caps_from_pad,
-    get_numpy_from_buffer,
     app_callback_class,
 )
 from hailo_apps_infra.pose_estimation_pipeline import GStreamerPoseEstimationApp
 from commands import simon_says
-from pose import Pose, left_hand_raised, right_hand_raised, hands_on_head
+from pose import Pose, right_leg_up
 
 _FILE = Path(__file__)
 _DIR = _FILE.parent
@@ -72,7 +65,7 @@ class user_app_callback_class(app_callback_class):
                 for voice_alias in voice_info.get("aliases", []):
                     aliases_info[voice_alias] = {"_is_alias": True, **voice_info}
             voices_info.update(aliases_info)
-            ensure_voice_exists(model, data_dir, download_dir, voices_info)
+            # ensure_voice_exists(model, data_dir, download_dir, voices_info)
             model, config = find_voice(model, data_dir)
 
         self.voice = PiperVoice.load(model, config_path=config, use_cuda=False)
@@ -97,23 +90,23 @@ def say_text(voice, players_out_text, command_idx, did_simon_say):
 
 
 def app_callback(pad, info, user_data):
-    # Get the GstBuffer from the probe info
-    buffer = info.get_buffer()
-    # Check if the buffer is valid
-    if buffer is None:
-        return Gst.PadProbeReturn.OK
-
     user_data.increment()
-    roi = hailo.get_roi_from_buffer(buffer)
-    detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
 
     if user_data.frame_count % 200 == 0:
-        if user_data.say_process is not None:
-            # previous process didn't finish, wait for it first
-            user_data.say_process.join()
+        if user_data.say_process is not None and user_data.say_process.is_alive():
+            # previous process didn't finish, wait for 3 seconds to finish
+            user_data.say_process.join(3)
 
         player_num = 0
         players_out = []
+
+        buffer = info.get_buffer()
+        if buffer is None:
+            return Gst.PadProbeReturn.OK
+
+        roi = hailo.get_roi_from_buffer(buffer)
+        detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
+
         for detection in detections:
             label = detection.get_label()
             if label == "person":
@@ -135,7 +128,7 @@ def app_callback(pad, info, user_data):
             players_out_text = "Players with numbers {} are out!".format(",".join(players_out))
 
         command_idx = random.randint(0, len(simon_says) - 1)
-        simon_say = (random.randint(1, 2) == 1) # 50% probability of "simon says"
+        simon_say = (random.randint(1, 4) < 4) # 75% probability of "simon says"
         user_data.say_process = Process(target=say_text, args=(user_data.voice, players_out_text, command_idx, simon_say))
         if simon_say:
             user_data.last_simon_says_command_idx = command_idx
